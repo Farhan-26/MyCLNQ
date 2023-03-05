@@ -34,7 +34,7 @@ const Home = () => {
   const searchItem = () => {
     if (searchValue !== '') {
       const newData = allApiData.filter(item => {
-        return item?.name.toLowerCase().includes(searchValue.toLowerCase());
+        return item?.name.toLowerCase().startsWith(searchValue.toLowerCase());
       });
       setMovieList(newData);
       setSearchValue('');
