@@ -1,25 +1,20 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
-  Dimensions,
+  Alert,
   FlatList,
-  Image,
-  ImageBackground,
   SafeAreaView,
   StyleSheet,
   Text,
-  View,
   TouchableOpacity,
-  TextInput,
+  View,
 } from 'react-native';
-import FastImage from 'react-native-fast-image';
+import Header from '../../component/header';
+import MovieDetail from '../../component/movieDetail';
 
 import api, {allApiData} from '../../constants/api';
 
-import images from '../../constants/images';
-
-const {height, width} = Dimensions.get('window');
-
 const Home = () => {
+  const flatListRef = useRef();
   // first api call
 
   const {content} = api?.ListingPage1?.page?.content_items;
@@ -27,16 +22,7 @@ const Home = () => {
   const [MovieList, setMovieList] = useState(content); // movie list detail state
   const [apiNumber, setApiNumber] = useState(1); // it is for api call when user scroll dow
   const [apiCall, setApiCall] = useState(false); // check api call or not
-  const [search, setSearch] = useState(false); // this is check user want to search
   const [searchValue, setSearchValue] = useState(''); // this is for search value
-
-  // if there is no search value then this useEffect run and set movie value
-  useEffect(() => {
-    if (searchValue.length <= 0) {
-      setMovieList(content);
-      setApiNumber(1);
-    }
-  }, [searchValue]);
 
   // this use effect for api call on pagination
 
@@ -52,15 +38,27 @@ const Home = () => {
 
   // this function for find search value is all that tree api
 
-  const searchItem = text => {
-    if (text) {
+  const searchItem = () => {
+    if (searchValue !== '') {
       const newData = allApiData.filter(item => {
         const itemData = item.name ? item.name.toUpperCase() : ''.toUpperCase();
-        const textData = text.toUpperCase();
+        const textData = searchValue.toUpperCase();
         return itemData.indexOf(textData) > -1;
       });
       setMovieList(newData);
+      setSearchValue('');
     }
+  };
+
+  // to get a seach text
+  const getSearchText = value => {
+    setSearchValue(value);
+  };
+
+  // this for back button
+
+  const onBack = () => {
+    flatListRef.current.scrollToOffset({animated: true, offset: 0});
   };
 
   return (
@@ -69,37 +67,14 @@ const Home = () => {
       {/* safe area view for ios */}
       <SafeAreaView style={styles.safeArea}>
         {/* hearder */}
-        <ImageBackground source={images.nav_bar} style={styles.backgroundImage}>
-          <View style={styles.hearderItem}>
-            <Image source={images.back} style={styles.backIcon} />
-            {search ? (
-              <View style={styles.search}>
-                <TextInput
-                  style={styles.textInput}
-                  value={searchValue}
-                  autoFocus={true}
-                  placeholder="search"
-                  onChangeText={text => setSearchValue(text)}
-                  placeholderTextColor={'#000'}
-                />
-              </View>
-            ) : (
-              <Text style={styles.headerText}>
-                {api?.ListingPage1?.page?.title}
-              </Text>
-            )}
-          </View>
-
-          <TouchableOpacity
-            onPress={() => {
-              setSearch(!search);
-              searchItem(searchValue);
-            }}>
-            <Image source={images.search} style={styles.movieImage} />
-          </TouchableOpacity>
-        </ImageBackground>
+        <Header
+          searchText={getSearchText}
+          onSearchClick={searchItem}
+          onBack={onBack}
+        />
         {/* render list items  */}
         <FlatList
+          ref={flatListRef}
           data={MovieList}
           contentContainerStyle={styles.flatListContainer}
           keyExtractor={(_, index) => index.toString()}
@@ -111,25 +86,27 @@ const Home = () => {
             }
           }}
           ListEmptyComponent={() => {
-            return <Text style={styles.noData}>No Data Found</Text>;
-          }}
-          onEndReachedThreshold={0.9}
-          numColumns={3}
-          renderItem={({item, index}) => {
             return (
-              <View style={styles.mainContainer}>
-                <FastImage
-                  style={styles.image}
-                  source={images[item?.poster_image]}
-                  resizeMode={FastImage.resizeMode.contain}
-                />
-
-                <Text style={styles.movieName}>
-                  {item?.name.substring(0, 15)}
-                </Text>
+              <View>
+                <Text style={styles.noData}>No Data Found</Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    flatListRef.current.scrollToOffset({
+                      animated: true,
+                      offset: 0,
+                    });
+                    setMovieList(content);
+                    setApiNumber(2);
+                    setSearchValue('');
+                  }}>
+                  <Text style={styles.noData}>Retry</Text>
+                </TouchableOpacity>
               </View>
             );
           }}
+          onEndReachedThreshold={0.9}
+          numColumns={3}
+          renderItem={({item}) => <MovieDetail item={item} />}
         />
       </SafeAreaView>
     </View>
@@ -141,35 +118,6 @@ export default Home;
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: '#202020'},
   safeArea: {alignItems: 'center'},
-  backgroundImage: {
-    height: 52,
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  hearderItem: {flexDirection: 'row', alignItems: 'center'},
-  backIcon: {
-    height: height * 0.03,
-    width: width * 0.07,
-    marginHorizontal: 15,
-    marginRight: 18,
-  },
-  search: {width: '75%'},
-  textInput: {
-    backgroundColor: '#fff',
-    width: '100%',
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    height: 40,
-    color: '#000',
-  },
-  headerText: {fontSize: 18, fontWeight: '500', color: '#fff'},
-  movieImage: {
-    height: height * 0.03,
-    width: width * 0.06,
-    marginRight: 15,
-  },
   flatListContainer: {
     paddingTop: 15,
     paddingBottom: 35,
@@ -179,19 +127,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '700',
     marginTop: 90,
-  },
-  mainContainer: {marginBottom: 25},
-  image: {
-    height: height * 0.2,
-    width: width / 3 - 15,
-    marginHorizontal: 5,
-    marginBottom: 4,
-  },
-  movieName: {
     textAlign: 'center',
-    fontSize: 16,
-    fontWeight: '400',
-    alignSelf: 'center',
-    color: '#fff',
   },
 });
