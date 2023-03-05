@@ -80,6 +80,7 @@ const Home = () => {
                   autoFocus={true}
                   placeholder="search"
                   onChangeText={text => setSearchValue(text)}
+                  placeholderTextColor={'#000'}
                 />
               </View>
             ) : (
@@ -161,6 +162,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 15,
     height: 40,
+    color: '#000',
   },
   headerText: {fontSize: 18, fontWeight: '500', color: '#fff'},
   movieImage: {
