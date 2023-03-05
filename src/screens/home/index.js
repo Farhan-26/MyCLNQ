@@ -1,13 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {
-  Alert,
-  FlatList,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {FlatList, SafeAreaView, StyleSheet, View} from 'react-native';
+import EmpthData from '../../component/emptyData';
 import Header from '../../component/header';
 import MovieDetail from '../../component/movieDetail';
 
@@ -85,25 +78,7 @@ const Home = () => {
               setApiCall(true);
             }
           }}
-          ListEmptyComponent={() => {
-            return (
-              <View>
-                <Text style={styles.noData}>No Data Found</Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    flatListRef.current.scrollToOffset({
-                      animated: true,
-                      offset: 0,
-                    });
-                    setMovieList(content);
-                    setApiNumber(2);
-                    setSearchValue('');
-                  }}>
-                  <Text style={styles.noData}>Retry</Text>
-                </TouchableOpacity>
-              </View>
-            );
-          }}
+          ListEmptyComponent={() => <EmpthData />}
           onEndReachedThreshold={0.9}
           numColumns={3}
           renderItem={({item}) => <MovieDetail item={item} />}
@@ -121,12 +96,5 @@ const styles = StyleSheet.create({
   flatListContainer: {
     paddingTop: 15,
     paddingBottom: 35,
-  },
-  noData: {
-    fontSize: 20,
-    color: '#fff',
-    fontWeight: '700',
-    marginTop: 90,
-    textAlign: 'center',
   },
 });
