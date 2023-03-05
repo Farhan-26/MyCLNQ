@@ -34,9 +34,7 @@ const Home = () => {
   const searchItem = () => {
     if (searchValue !== '') {
       const newData = allApiData.filter(item => {
-        const itemData = item.name ? item.name.toUpperCase() : ''.toUpperCase();
-        const textData = searchValue.toUpperCase();
-        return itemData.indexOf(textData) > -1;
+        return item?.name.toLowerCase().includes(searchValue.toLowerCase());
       });
       setMovieList(newData);
       setSearchValue('');
