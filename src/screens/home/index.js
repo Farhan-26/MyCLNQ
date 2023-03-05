@@ -1,5 +1,11 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {FlatList, SafeAreaView, StyleSheet, View} from 'react-native';
+import {
+  FlatList,
+  RefreshControl,
+  SafeAreaView,
+  StyleSheet,
+  View,
+} from 'react-native';
 
 const MovieDetail = React.lazy(() => import('../../component/movieDetail'));
 const Header = React.lazy(() => import('../../component/header'));
@@ -17,6 +23,7 @@ const Home = () => {
   const [apiNumber, setApiNumber] = useState(1); // it is for api call when user scroll dow
   const [apiCall, setApiCall] = useState(false); // check api call or not
   const [searchValue, setSearchValue] = useState(''); // this is for search value
+  const [refresh, setRefresh] = useState(false); // this is for search value
 
   // this use effect for api call on pagination
 
@@ -37,6 +44,7 @@ const Home = () => {
       const newData = allApiData.filter(item => {
         return item?.name.toLowerCase().startsWith(searchValue.toLowerCase());
       });
+
       setMovieList(newData);
       setSearchValue('');
     }
@@ -45,6 +53,7 @@ const Home = () => {
   // to get a seach text
   const getSearchText = value => {
     setSearchValue(value);
+    setRefresh(true);
   };
 
   // this for back button
@@ -67,18 +76,30 @@ const Home = () => {
         {/* render list items  */}
         <FlatList
           ref={flatListRef}
+          showsVerticalScrollIndicator={false}
           data={MovieList}
+          refreshControl={
+            <RefreshControl
+              refreshing={false}
+              onRefresh={() => {
+                if (refresh) {
+                  setMovieList(allApiData);
+                  setRefresh(false);
+                  setSearchValue('');
+                }
+              }}
+            />
+          }
           contentContainerStyle={styles.flatListContainer}
           keyExtractor={(_, index) => index.toString()}
-          showsVerticalScrollIndicator={false}
           onEndReached={() => {
-            if (apiNumber < 3 && searchValue.length === 0) {
+            if (apiNumber < 3 && searchValue.length === 0 && !refresh) {
               setApiNumber(apiNumber + 1);
               setApiCall(true);
             }
           }}
           ListEmptyComponent={() => <EmpthData />}
-          onEndReachedThreshold={0.9}
+          onEndReachedThreshold={0.5}
           numColumns={3}
           renderItem={({item}) => <MovieDetail item={item} />}
         />
