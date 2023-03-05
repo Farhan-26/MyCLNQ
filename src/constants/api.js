@@ -4,8 +4,6 @@ const api = {
   ListingPage3: require('../API/CONTENTLISTINGPAGE-PAGE3.json'),
 };
 
-console.log(api?.ListingPage2);
-
 export const allApiData = [
   ...api?.ListingPage1?.page?.content_items?.content,
   ...api?.ListingPage2?.page?.content_items?.content,

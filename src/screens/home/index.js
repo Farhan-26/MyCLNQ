@@ -1,8 +1,9 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {FlatList, SafeAreaView, StyleSheet, View} from 'react-native';
-import EmpthData from '../../component/emptyData';
-import Header from '../../component/header';
-import MovieDetail from '../../component/movieDetail';
+
+const MovieDetail = React.lazy(() => import('../../component/movieDetail'));
+const Header = React.lazy(() => import('../../component/header'));
+const EmpthData = React.lazy(() => import('../../component/emptyData'));
 
 import api, {allApiData} from '../../constants/api';
 
